@@ -49,4 +49,42 @@ Route::get(uri:'/cliente/listar', action: function (){
     return response("Cliente Listado Correctamente ". now()->toDateTimeString(), 200);
     
 });
- 
+
+// aqui tenemos tipos de peticiones GET, POST, PUT, DELETE, PATCH, OPTIONS
+// GET: para obtener datos
+// POST: para crear datos
+// PUT: para actualizar datos
+// DELETE: para eliminar datos
+// PATCH: para actualizar parcialmente datos
+// OPTIONS: para obtener información sobre los métodos HTTP soportados por el servidor
+
+/*
+Es importante definir el orden de las rutas, Se ejecuta de arriba hacia abajo, ya que si definimos una ruta con parámetros antes de una ruta sin parámetros, 
+la ruta con parámetros se ejecutará primero y la ruta sin parámetros nunca se ejecutará. 
+*/
+
+Route::get('/posts', function () {
+    return "Aqui se mostrar todos los posts";
+});
+
+// La URL larga segeria : http://localhost/tallerlaravel/public/posts/post-1
+Route::get("posts/post-1", function () {    
+    return "Aqui se mostrara el post 1";
+});
+
+// La URL larga segeria : http://localhost/tallerlaravel/public/posts/50 con parametros
+Route::get("posts/{post}", function ($post) {    
+    return "Aqui se mostrara el post {$post}";
+});
+// La URL larga segeria : http://localhost/tallerlaravel/public/posts/50/tecnologia con parametros
+Route::get("posts/{post}/{category}", function ($post, $category) {    
+    return "Aqui se mostrara el post {$post} en la categoria {$category}";
+});
+
+// La URL larga segeria : http://localhost/tallerlaravel/public/posts2/50/ con parametros con/ Opciones
+Route::get("posts2/{post}/{category?}", function ($post, $category=null) {  
+    if($category==null){
+        $category = "Sin Categoria";
+    }
+    return "Aqui se mostrara el post {$post} en la categoria {$category}";
+});
