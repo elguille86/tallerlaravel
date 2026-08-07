@@ -59,3 +59,30 @@ Laravel utiliza **Blade** como su motor de plantillas predeterminado. A diferenc
 ```html
   <h2>Aquí se mostrará el post {{ $post }}</h2>
 ```
+
+## Commit: 05 - Componentes con Blade y Configuración de Tailwind CSS
+
+En este commit se integra la arquitectura de **componentes reutilizables de Blade** para modularizar la interfaz de usuario, combinada con **[Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)** para la estilización ágil y responsiva de las vistas.
+
+### 1. Integración de Tailwind CSS (vvia CDN v3)
+
+Para esta sesión de clase y el prototipado rápido de la interfaz, se utiliza la integración directa mediante el CDN de **Tailwind CSS v3**:
+
+```html
+<script src="https://cdn.tailwindcss.com"></script>
+```
+
+### 2. Componentes de Blade (`x-component`)
+
+Los componentes de Blade permiten encapsular fragmentos de HTML reusables (botones, alertas, tarjetas, estructuras de diseño) evitando la duplicación de código. Creando el Directorio "components" ( Tenemos Componentes Anonimos y de Clase)
+
+
+* **Ubicación de los componentes:**
+```text
+  resources/views/components/
+```
+
+* **Comando ejecutado de Clase:**
+```bash
+PS D:\xampp\htdocs\tallerlaravel> php artisan make:component alert2
+```
