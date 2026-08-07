@@ -20,3 +20,17 @@ Repositorio público destinado al almacenamiento, desarrollo y prácticas paso a
 ```bash
 git clone <URL_DE_TU_REPOSITORIO>
 cd <NOMBRE_DE_TU_CARPETA>
+```
+
+### Clases: Controladores en Laravel
+
+## 📝 Historial de Clases y Commits
+
+
+#### Commit: 03 -  Creación de controlador (`HomeController`)
+* **Comando ejecutado:**
+```bash
+PS D:\xampp\htdocs\tallerlaravel> php artisan make:controller HomeController
+PS D:\xampp\htdocs\tallerlaravel> php artisan make:controller PostController
+```
+Se generó el controlador base app/Http/Controllers/HomeController.php y app/Http/Controllers/PostController.php mediante Artisan para gestionar las peticiones HTTP de la página principal de la aplicación.
