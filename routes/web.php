@@ -4,12 +4,15 @@ use App\Models\Cliente;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\HomelayoutController;
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
 // Se ha cambiar la ruta de la pagina principal a un controlador, para ello se ha creado el controlador HomeController.php
 Route::get('/', HomeController::class);
+// La URL larga segeria : http://localhost/tallerlaravel/public/homelayout 
+Route::get('/homelayout', HomelayoutController::class);
 
 Route::get(uri:'/cliente/crear', action: function (){
     $cliente = new Cliente();

@@ -86,3 +86,44 @@ Los componentes de Blade permiten encapsular fragmentos de HTML reusables (boton
 ```bash
 PS D:\xampp\htdocs\tallerlaravel> php artisan make:component alert2
 ```
+
+
+## Commit: 06 - Plantillas y Directivas de Control en Blade
+
+En este commit se consolida el uso de **plantillas Blade** mediante directivas de control (`@if`, `@foreach`, `@forelse`) y la reutilización de vistas para renderizar datos dinámicos provenientes de los controladores de Laravel.
+
+### 2. Tipos de plantillas creadas en este proyecto
+ 
+* **Layouts tradicionales con Blade:**
+  * Archivo: `resources/views/layouts/app.blade.php`
+  * Uso: `@extends('layouts.app')` en vistas como `Homelayout.blade.php`
+  * Secciones: `@section('content22')` y `@yield('content22')` en el layout.
+  * URL TEST : tallerlaravel/public/homelayout
+
+* **Componentes de layout:**
+  * Archivo: `resources/views/components/app-layout.blade.php`
+  * Uso: `<x-app-layout> ... </x-app-layout>` en vistas como `Home.blade.php`
+  * El contenido pasa al componente mediante la variable Blade `$slot`.
+  * URL TEST : tallerlaravel/public/
+
+* **Componentes de alerta reutilizables:**
+  * `resources/views/components/alert.blade.php` — componente anónimo con `@props(['type' => 'info'])` y clases dinámicas según el tipo.
+  * `resources/views/components/alert2.blade.php` — componente creado con Artisan (`php artisan make:component alert2`) y renderizado como `<x-alert2>`.
+  * Ambos componentes usan slots para el título (`<x-slot name="title">`) y el contenido dinámico.
+
+* **Differences entre Layout y Component Layout:**
+  * El layout tradicional con `@extends` define una plantilla base y una sección de contenido.
+  * El componente de layout con `<x-app-layout>` actúa como un wrapper reutilizable que recibe contenido en `$slot`.
+
+### 1. Directivas de Control de Flujo en Blade
+
+Blade ofrece accesos directos a las estructuras de control comunes de PHP de forma limpia y legible dentro del HTML.
+
+* **Estructuras condicionales:**
+```html
+  @if(count($posts) > 0)
+      <p>Hay artículos publicados.</p>
+  @else
+      <p>No se encontraron publicaciones.</p>
+  @endif
+```  
