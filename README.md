@@ -92,7 +92,7 @@ PS D:\xampp\htdocs\tallerlaravel> php artisan make:component alert2
 
 En este commit se consolida el uso de **plantillas Blade** mediante directivas de control (`@if`, `@foreach`, `@forelse`) y la reutilización de vistas para renderizar datos dinámicos provenientes de los controladores de Laravel.
 
-### 2. Tipos de plantillas creadas en este proyecto
+### 1. Tipos de plantillas creadas en este proyecto
  
 * **Layouts tradicionales con Blade:**
   * Archivo: `resources/views/layouts/app.blade.php`
@@ -115,7 +115,7 @@ En este commit se consolida el uso de **plantillas Blade** mediante directivas d
   * El layout tradicional con `@extends` define una plantilla base y una sección de contenido.
   * El componente de layout con `<x-app-layout>` actúa como un wrapper reutilizable que recibe contenido en `$slot`.
 
-### 1. Directivas de Control de Flujo en Blade
+### 2. Directivas de Control de Flujo en Blade
 
 Blade ofrece accesos directos a las estructuras de control comunes de PHP de forma limpia y legible dentro del HTML.
 
@@ -127,3 +127,64 @@ Blade ofrece accesos directos a las estructuras de control comunes de PHP de for
       <p>No se encontraron publicaciones.</p>
   @endif
 ```  
+
+## Commit: 07 - Conexion con la Base de Datos
+## 🗄️ Base de datos y migraciones
+
+En este proyecto se configuró la base de datos MySQL como sigue:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bdtaller1
+DB_USERNAME=root
+DB_PASSWORD=miclave
+```
+
+La base de datos `bdtaller1` debe existir en tu servidor MySQL antes de ejecutar las migraciones. Puedes crearla con un cliente como phpMyAdmin o desde la consola MySQL:
+
+```sql
+CREATE DATABASE bdtaller1 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### Migraciones aplicadas
+
+El proyecto incluye las migraciones por defecto de Laravel y algunas migraciones propias con las cuales se puede hacer un mantenimiento simple y creacion de clave forarena entre tabla cliente y venta:
+
+* `database/migrations/0001_01_01_000000_create_users_table.php`
+* `database/migrations/0001_01_01_000001_create_cache_table.php`
+* `database/migrations/0001_01_01_000002_create_jobs_table.php`
+* `database/migrations/2026_08_03_183251_crear_tabla_cliente.php`
+* `database/migrations/2026_08_03_210000_agregar_columna_descripcion_tabla_cliente.php`
+* `database/migrations/2026_08_04_035105_crear_tabla_venta.php`
+* `database/migrations/2026_08_04_154022_create_detalle_venta_table.php`
+
+### Ejecutar migraciones
+
+* Para aplicar las migraciones en el entorno local:
+```bash
+php artisan migrate
+```
+
+* Hacer rollback de la última tanda de migraciones:
+```bash
+php artisan migrate:rollback
+```
+* Para regresar solo una vez (último batch) también puedes usar:
+```bash
+php artisan migrate:rollback --step=1
+```
+
+* Y si quieres borrar todo y volver a migrar desde cero:
+```bash
+php artisan migrate:fresh
+```
+
+Si necesitas limpiar las vistas compiladas y la cache de configuración después de cambios en el `.env` o en las vistas:
+```bash
+php artisan view:clear
+php artisan config:clear
+php artisan cache:clear
+php artisan optimize:clear
+```
