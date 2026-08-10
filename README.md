@@ -188,3 +188,27 @@ php artisan config:clear
 php artisan cache:clear
 php artisan optimize:clear
 ```
+## Commit: 08 - Migracciones con la Base de Datos
+
+Creacion de tabla Posts
+```bash
+php artisan make:migration create_posts_table    
+```
+vuelve a ejecutar todas las migraciones
+```bash
+php artisan migrate:reflesh  
+```
+
+Agregar una columna a un tabla existente
+```bash
+php artisan make:migration add_avatar_to_users_table
+```
+En la migracion adicional el campo nuevo 
+```php
+public function up(): void
+{
+  Schema::table('users', function (Blueprint $table) {
+    $table->string('avatar')->nullable()->after('email');
+  });
+}
+```
