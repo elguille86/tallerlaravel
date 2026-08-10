@@ -212,3 +212,84 @@ public function up(): void
   });
 }
 ```
+ 
+## Commit: 09 - Eloquent ORM y Modelos
+
+En esta clase se introduce **Eloquent**, el ORM de Laravel para trabajar con bases de datos usando modelos y relaciones sin escribir SQL directo.
+
+Conceptos clave
+
+* **Modelos:** representan tablas de la base de datos. Un modelo típico se encuentra en `app/Models/Post.php`.
+* **Consultas limpias:** Eloquent usa métodos como `all()`, `find()`, `where()`, `create()` y `update()` para manejar datos.
+* **Relaciones:** permite definir `hasOne`, `hasMany`, `belongsTo`, `belongsToMany`, etc.
+* **Mass assignment:** protege qué campos pueden llenarse en masa con `$fillable` o `$guarded`.
+
+* **Creacion de Modelo:**
+```bash
+php artisan make:model Post 
+```
+
+* **Ejemplo básico de modelo**
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    protected $fillable = ['title', 'body', 'user_id'];
+}
+```
+
+* **Ejemplo de uso en controlador**
+
+```php
+use App\Models\Post;
+
+// Obtener todos los posts
+$posts = Post::all();
+
+// Crear un nuevo post
+$post = Post::create([
+    'title' => 'Mi primer post',
+    'body' => 'Contenido de ejemplo',
+    'user_id' => 1,
+]);
+
+// Actualizar un post existente
+$post->update(['title' => 'Título actualizado']);
+```
+
+* **Relaciones Eloquent**
+
+```php
+class User extends Model
+{
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+}
+
+class Post extends Model
+{
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+* **Comandos útiles**
+
+* `php artisan make:model Post -m` — crea el modelo y una migración.
+* `php artisan make:model Comment -m` — crea un modelo `Comment` con migración.
+* `php artisan tinker` — probar consultas Eloquent en consola.
+
+* ** Objetivos de la clase 09 **
+
+1. Entender cómo funciona Eloquent dentro de Laravel.
+2. Crear modelos básicos y proteger atributos con `$fillable`.
+3. Definir relaciones entre tablas.
+4. Realizar operaciones CRUD usando Eloquent en lugar de SQL directo.

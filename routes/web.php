@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\HomelayoutController;
+use App\Models\Post;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -96,3 +97,49 @@ Route::get("posts2/{post}/{category?}", function ($post, $category=null) {
     return "Aqui se mostrara el post {$post} en la categoria {$category}";
 });
 */
+
+Route::get('prueba',  function () {
+    // Crear un registro en la tabla posts
+
+    // $post = new Post();
+    // $post->title = "Titulo de prueba 3";
+    // $post->content = "Contenido de prueba 3";
+    // $post->categoria = "Categoria de prueba 3";
+    // $post->save();
+    //return $post;
+
+    // Recuperar un registro de la tabla posts 
+    //$post = Post ::find(1);
+    //return $post;
+
+    // // este filtro es equivalente a SELECT * FROM posts WHERE title = 'Titulo de prueba 2' LIMIT 1
+    // $post = Post::where('title', 'Titulo de prueba 2')->first();
+    // // Aqui se puede modificar el registro recuperado para actualizarlo, por ejemplo:
+    // $post->categoria = "Desarrollo Web";
+    // $post->save();
+    //return $post;
+
+
+    // recuperar todos los registros de la tabla posts    
+    //$post = Post ::all();
+    //return $post;
+
+    // recuperar todos los registros de la tabla posts con un filtro, por ejemplo, todos los registros con id >= 2
+    //$post = Post::where('id', '>=','2')->get();
+    //return $post;
+
+    // recuperar todos los registros de la tabla posts con un filtro, por ejemplo, todos los registros con id >= 2 y ordenados por id descendente    
+    //$post = Post::where('id', '>=','2')->orderBy('id', 'desc')->get();    
+    //return $post;    
+
+
+    // recuperar todos los registros de la tabla posts con un filtro, por ejemplo, todos los registros con id >= 2 y solo mostrar los campos title, categoria e id   
+    //$post = Post::where('id', '>=','2')->select('title','categoria','id')->get();    
+    //return $post;
+
+    //Eliminar un registro de la tabla posts
+    $post = Post ::find(1);
+    $post->delete();
+    return "Eliminardo correctamente  "  ;        
+
+});
