@@ -138,8 +138,18 @@ Route::get('prueba',  function () {
     //return $post;
 
     //Eliminar un registro de la tabla posts
-    $post = Post ::find(1);
-    $post->delete();
-    return "Eliminardo correctamente  "  ;        
+    //$post = Post ::find(1);
+    //$post->delete();
+    //return "Eliminardo correctamente  "  ;        
 
+    // Probando que seguridad que se brindo al campo title en el modelo
+    // $post = new Post();
+    // $post->title = "Título DE prueBA 4";
+    // $post->content = "Contenido de prueba 4";
+    // $post->categoria = "Categoria de prueba 4";
+    // $post->save();
+    // return $post;
+
+    $post = Post ::find(4);
+    return $post;
 });

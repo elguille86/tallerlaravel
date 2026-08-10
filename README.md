@@ -293,3 +293,76 @@ class Post extends Model
 2. Crear modelos básicos y proteger atributos con `$fillable`.
 3. Definir relaciones entre tablas.
 4. Realizar operaciones CRUD usando Eloquent en lugar de SQL directo.
+
+## Commit: 10 - Mutadores y Accesores en Eloquent
+
+En esta clase se documentan los **mutadores** y **accesores**, dos características de Eloquent que permiten transformar los datos de los modelos al guardar y al leer.
+
+* **¿Qué es un mutador?**
+Un mutador modifica un valor antes de almacenarlo en la base de datos.
+
+```php
+class Post extends Model
+{
+    protected $fillable = ['title', 'body', 'user_id'];
+
+    public function setTitleAttribute($value)
+    {
+        $this->attributes['title'] = ucfirst($value);
+    }
+}
+```
+
+* **¿Qué es un accesor?**
+Un accesor modifica un valor cuando se obtiene desde el modelo.
+
+```php
+class Post extends Model
+{
+    protected $fillable = ['title', 'body', 'user_id'];
+
+    public function getTitleAttribute($value)
+    {
+        return strtoupper($value);
+    }
+}
+```
+
+* **Ejemplos prácticos**
+
+* **Mutador para contraseñas**
+
+```php
+public function setPasswordAttribute($value)
+{
+    $this->attributes['password'] = bcrypt($value);
+}
+```
+
+* **Accesor para mostrar el título formateado**
+
+```php
+public function getTitleAttribute($value)
+{
+    return "Título: {$value}";
+}
+```
+
+**Beneficios**
+
+* Permite centralizar la lógica de transformación en el modelo.
+* Evita repetir formateo en controladores o vistas.
+* Mejora la coherencia en los datos que se guardan y se muestran.
+
+**Buenas prácticas**
+
+* Usa mutadores para normalizar y proteger valores antes de guardar.
+* Usa accesores para presentar datos con formato sin cambiar el valor original.
+* Mantén el nombre del método en el formato `setXAttribute` y `getXAttribute`.
+
+**Objetivos de la clase**
+
+1. Entender la diferencia entre guardar datos y leer datos en Eloquent.
+2. Aprender a crear mutadores para transformar valores antes del guardado.
+3. Aprender a crear accesores para formatear valores al obtenerlos.
+4. Aplicar mutadores y accesores en modelos reales para mantener la lógica de datos en un solo lugar.
