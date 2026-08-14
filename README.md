@@ -366,3 +366,160 @@ public function getTitleAttribute($value)
 2. Aprender a crear mutadores para transformar valores antes del guardado.
 3. Aprender a crear accesores para formatear valores al obtenerlos.
 4. Aplicar mutadores y accesores en modelos reales para mantener la lógica de datos en un solo lugar.
+
+## Commit: 11 - Casting de Atributos en Eloquent
+
+Se introduce el **casting de atributos** (attribute casting), una característica poderosa de Eloquent que permite convertir automáticamente los valores de los atributos del modelo a tipos PHP específicos al leer de la base de datos y al guardar.
+
+**¿Qué es Casting?**
+
+El casting es el proceso de convertir un tipo de dato a otro. En Eloquent, el casting automático transforma:
+- Strings de la base de datos → Enteros, booleanos, fechas, JSON, etc.
+- Tipos PHP complejos → Formatos apropiados para almacenar en la BD.
+
+Esto simplifica el trabajo eliminando conversiones manuales en controladores o vistas.
+
+**Diferencia entre Casting, Mutadores y Accesores**
+
+| Concepto | Propósito | Cuándo usar |
+|----------|-----------|-------------|
+| **Casting** | Conversión automática de tipos | Cambios simples de tipo (string → int, datetime, etc.) |
+| **Mutadores** | Modificar valor antes de guardar | Transformaciones específicas (encriptación, formato) |
+| **Accesores** | Modificar valor al obtener | Presentar datos en un formato legible |
+
+**Método `casts()` en el Modelo**
+
+En Laravel 11, el método `casts()` define la conversión de tipos para los atributos del modelo:
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    // Define qué atributos deben convertirse a qué tipos
+    protected function casts(): array
+    {
+        return [
+            'published_at' => 'datetime',  // Convierte a instancia Carbon
+            'is_active' => 'boolean',     // Convierte a booleano
+        ];
+    }
+}
+```
+
+**Tipos de Casting Disponibles**
+
+Eloquent soporta varios tipos de casting nativos:
+
+| Tipo | Descripción | Ejemplo |
+|------|-------------|---------|
+| `array` | Convierte a array PHP | JSON → Array |
+| `boolean` | Convierte a booleano | `"1"` → `true`, `"0"` → `false` |
+| `collection` | Convierte a Collection de Laravel | |
+| `date` | Convierte a instancia Date | `"2026-08-13"` → Date |
+| `datetime` o `immutable_datetime` | Convierte a instancia Carbon | `"2026-08-13 10:30:00"` → Carbon |
+| `decimal` | Convierte a número decimal | `"10.50"` → `"10.50"` (preserva precisión) |
+| `double` | Convierte a número flotante | `"10.5"` → `10.5` |
+| `encrypted` | Encripta/desencripta el valor | |
+| `float` | Convierte a flotante | `"10"` → `10.0` |
+| `integer` o `int` | Convierte a entero | `"42"` → `42` |
+| `json` | Convierte de/hacia JSON | Array/Object ↔ JSON |
+| `object` | Convierte a objeto stdClass | |
+| `string` | Convierte a string | |
+| `timestamp` | Convierte a timestamp Unix | |
+
+**Ejemplo Práctico: Casting en el Modelo Post**
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    protected $table = 'posts';
+
+    protected function casts(): array
+    {
+        return [
+            'published_at' => 'datetime',  // Convertir a Carbon datetime
+            'is_active' => 'boolean',     // Convertir a booleano
+            'views' => 'integer',         // Convertir a entero
+            'metadata' => 'json',         // Convertir a array desde JSON
+        ];
+    }
+}
+```
+
+**Uso del Modelo con Casting**
+
+```php
+// Obtener un post
+$post = Post::find(1);
+
+// Los valores se convierten automáticamente
+echo $post->published_at; // Instancia Carbon (ej: "2026-08-13 10:30:00")
+echo $post->published_at->format('d/m/Y'); // Formatear la fecha: "13/08/2026"
+
+if ($post->is_active) {
+    echo "El post está activo"; // is_active ya es un booleano
+}
+
+echo $post->views + 10; // views es un entero, suma directa
+```
+
+**Casting Personalizado con Attribute**
+
+Para transformaciones más complejas, se puede combinar casting con la clase `Attribute`:
+
+```php
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    // Casting personalizado de título
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ucfirst($value),        // Accesor: primera letra mayúscula
+            set: fn ($value) => strtolower($value),     // Mutador: todo en minúscula
+        );
+    }
+
+    // Casting estándar
+    protected function casts(): array
+    {
+        return [
+            'published_at' => 'datetime',
+            'is_active' => 'boolean',
+        ];
+    }
+}
+```
+
+**Ventajas del Casting**
+
+1. **Automatización:** No necesitas escribir conversiones manuales en cada controlador.
+2. **Seguridad de tipos:** Garantiza que los datos tengan el tipo correcto.
+3. **Consistencia:** Todos los modelos aplican las mismas reglas de conversión.
+4. **Legibilidad:** El código es más limpio y fácil de entender.
+5. **Reutilización:** Define una vez en el modelo y úsalo en cualquier parte de la aplicación.
+
+**Escenarios de Uso**
+
+1. **Fechas y Horas:** Convertir strings a instancias Carbon para manipular fechas fácilmente.
+2. **Booleanos:** Convertir valores numéricos o strings a booleanos (1/0, true/false, "1"/"0").
+3. **JSON:** Almacenar datos complejos como JSON en la BD y acceder como arrays/objetos PHP.
+4. **Números:** Asegurar que IDs y contadores sean enteros.
+5. **Datos sensibles:** Encriptar campos con `'encrypted'`.
+
+**Objetivos de la clase**
+
+1. Entender qué es el casting y sus beneficios.
+2. Diferenciar entre casting, mutadores y accesores.
+3. Usar el método `casts()` para definir conversiones automáticas.
+4. Aplicar casting personalizado con `Attribute` para transformaciones complejas.
+5. Mejorar la seguridad de tipos y la consistencia del código en modelos Eloquent.

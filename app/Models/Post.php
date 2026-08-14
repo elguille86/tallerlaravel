@@ -28,6 +28,14 @@ class Post extends Model
             //set: function($value) {return strtolower($value);}
         );
     }
+
+    // para eloquent todos los datos son de tipo string
+    protected function casts(): array{
+        return [
+            'published_at'=>'datetime',
+            'is_active'=>'boolean',
+        ];
+    } 
    
 
 

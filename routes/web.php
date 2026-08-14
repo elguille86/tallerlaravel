@@ -150,6 +150,15 @@ Route::get('prueba',  function () {
     // $post->save();
     // return $post;
 
-    $post = Post ::find(4);
+    //$post = Post ::find(4);
+    //return $post;
+});
+
+
+Route::get('prueba2',  function () {
+    $post = Post::find(1);
+    //return $post->created_at->format('d-m-Y');
+    //return $post->created_at->diffForHumans();    
+    //return $post->published_at->format('d-m-Y');
     return $post;
 });
