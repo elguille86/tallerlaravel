@@ -17,9 +17,24 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
+
+        // ejecutamos los Seeder que se requiera
+        $this->call([
+            PostSeeder::class,
+            UserSeeder::class,
         ]);
+        //  Ejecutando con el php artisan db:seed
+
+        // Seeder para crear usuario de prueba
+        // $user = new User();
+        // $user->name = 'Luis Perez';
+        // $user->email = 'luisperes@gmail.com';
+        // $user->password = bcrypt( '12345678');
+        // $user->save();
+        
     }
 }

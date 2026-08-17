@@ -523,3 +523,246 @@ class Post extends Model
 3. Usar el método `casts()` para definir conversiones automáticas.
 4. Aplicar casting personalizado con `Attribute` para transformaciones complejas.
 5. Mejorar la seguridad de tipos y la consistencia del código en modelos Eloquent.
+
+---
+## Seeders: 12 - (Sembradores de Base de Datos)
+
+Un **Seeder** es una clase que permite llenar la base de datos con datos de prueba de forma automática. Son útiles para:
+- Poblar la BD con datos iniciales después de las migraciones
+- Crear datos realistas para testing y desarrollo
+- Reproducir el estado de la BD de forma consistente
+- Evitar insertar datos manualmente con phpMyAdmin
+
+#**Estructura de un Seeder**
+
+```php
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class PostSeeder extends Seeder
+{
+    // Desactiva eventos de modelo durante el seeding (mejora rendimiento)
+    use WithoutModelEvents;
+
+    /**
+     * Ejecuta el seeder para poblar la tabla posts
+     */
+    public function run(): void
+    {
+        // Aquí va la lógica para insertar datos
+    }
+}
+```
+
+**Crear un Seeder**
+
+**Comando Artisan:**
+```bash
+php artisan make:seeder PostSeeder
+```
+
+Esto crea el archivo `database/seeders/PostSeeder.php`
+
+**Registrar un Seeder en DatabaseSeeder**
+
+El seeder principal es `DatabaseSeeder.php`. Para ejecutar múltiples seeders, regístralos con `$this->call()`:
+
+```php
+public function run(): void
+{
+    // Crear usuario de prueba
+    User::create([...]);
+
+    // Llamar al PostSeeder
+    $this->call(PostSeeder::class);
+    
+    // Llamar a otros seeders
+    $this->call(CommentSeeder::class);
+}
+```
+
+**Formas de Insertar Datos en un Seeder**
+
+** 1. Usando `create()` del Modelo (Recomendado)**
+
+```php
+public function run(): void
+{
+    Post::create([
+        'title' => 'Mi Primer Post',
+        'content' => 'Contenido del post',
+        'is_active' => true,
+        'published_at' => now(),
+    ]);
+}
+```
+
+**Ventajas:**
+- Los mutadores y accesores se aplican automáticamente
+- El casting funciona correctamente
+- Respeta las reglas del modelo
+
+**2. Usando Schema Query Builder (Más rápido)**
+
+```php
+use Illuminate\Support\Facades\DB;
+
+public function run(): void
+{
+    DB::table('posts')->insert([
+        'title' => 'Mi Primer Post',
+        'content' => 'Contenido',
+        'created_at' => now(),
+    ]);
+}
+```
+
+**Ventajas:**
+- Más rápido para inserciones masivas
+- Evita triggering de eventos
+
+**Desventajas:**
+- No aplica mutadores ni accesores
+- No valida datos del modelo
+
+**3. Usando Factory (Para muchos registros)**
+
+```php
+public function run(): void
+{
+    Post::factory(50)->create(); // Crea 50 posts aleatorios
+}
+```
+
+**Ejemplo Completo: PostSeeder**
+
+```php
+namespace Database\Seeders;
+
+use App\Models\Post;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class PostSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    public function run(): void
+    {
+        // Post 1: Activo con todos los datos
+        Post::create([
+            'title' => 'INTRODUCCIÓN A LARAVEL',
+            'content' => 'Laravel es un framework PHP moderno...',
+            'categoria' => 'Backend',
+            'is_active' => true,
+            'published_at' => now()->subDays(5),
+            'views' => 150,
+            'featured_image' => 'https://example.com/laravel.jpg',
+            'slug' => 'introducción a laravel',
+            'metadata' => json_encode([
+                'author' => 'Juan García',
+                'tags' => ['Laravel', 'PHP'],
+            ]),
+        ]);
+
+        // Post 2: Inactivo
+        Post::create([
+            'title' => 'CASTING EN ELOQUENT',
+            'content' => 'El casting automático permite...',
+            'categoria' => 'Tutorial',
+            'is_active' => false,
+            'published_at' => null,
+            'views' => 0,
+            'metadata' => json_encode(['status' => 'draft']),
+        ]);
+    }
+}
+```
+
+**Ejecutar Seeders**
+
+**Ejecutar todos los seeders registrados en DatabaseSeeder**
+
+```bash
+php artisan db:seed
+```
+
+**Ejecutar un seeder específico**
+
+```bash
+php artisan db:seed --class=PostSeeder
+```
+
+**Ejecutar migraciones + seeders (en un solo comando)**
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+**Nota:** `migrate:fresh` borra TODAS las tablas y las recrea desde cero.
+
+**Ejecutar migraciones + seeders en la rama de testing**
+
+```bash
+php artisan migrate:fresh --seed --env=testing
+```
+
+**Flujo Completo de Desarrollo**
+
+```bash
+# 1. Crear la migración
+php artisan make:migration create_posts_table
+
+# 2. Definir campos en la migración y ejecutar
+php artisan migrate
+
+# 3. Crear el modelo
+php artisan make:model Post
+
+# 4. Agregar casting al modelo
+# (Editar app/Models/Post.php)
+
+# 5. Crear el seeder
+php artisan make:seeder PostSeeder
+
+# 6. Poblar el seeder con datos
+# (Editar database/seeders/PostSeeder.php)
+
+# 7. Registrar el seeder en DatabaseSeeder
+# (Editar database/seeders/DatabaseSeeder.php con $this->call(PostSeeder::class))
+
+# 8. Ejecutar todas las migraciones y seeders
+php artisan migrate:fresh --seed
+
+# Base de datos lista con datos de prueba
+```
+
+**Debugging de Seeders**
+
+Si algo sale mal durante el seeding:
+
+```bash
+# Ver el error
+php artisan db:seed --class=PostSeeder
+
+# Revertir migraciones y reintentar
+php artisan migrate:rollback
+php artisan migrate
+php artisan db:seed
+```
+
+**Seeders en el Proyecto Actual**
+
+**Ubicación:** `database/seeders/`
+
+- `DatabaseSeeder.php` — Seeder principal que coordina otros seeders
+- `PostSeeder.php` — Seeder para la tabla posts (Taller 11)
+
+**Para ejecutar y probar el casting:**
+```bash
+php artisan migrate:fresh --seed
+```
+
+Esto recreará la BD con la tabla `posts` poblada con datos de prueba que demuestran todos los tipos de casting.
