@@ -24,6 +24,7 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        // uso de los Factory , es uso de nombre del modulo seguido de Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),

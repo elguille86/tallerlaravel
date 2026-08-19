@@ -766,3 +766,115 @@ php artisan migrate:fresh --seed
 ```
 
 Esto recreará la BD con la tabla `posts` poblada con datos de prueba que demuestran todos los tipos de casting.
+
+---
+## Factories: 13 - (Datos de Prueba con Model Factories)
+
+Una **Factory** permite generar registros de prueba con datos realistas y aleatorios usando Faker. Es útil para probar listados, relaciones y funcionalidades de la aplicación sin insertar los datos manualmente.
+
+**Estructura de una Factory**
+
+Las factories se guardan en:
+
+```text
+database/factories/
+```
+En este proyecto se utiliza `UserFactory.php` para generar registros del modelo `User`.
+
+```php
+namespace Database\Factories;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class UserFactory extends Factory
+{
+    protected $model = User::class;
+
+    public function definition(): array
+    {
+        return [
+            'name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
+            'password' => bcrypt('password'),
+        ];
+    }
+}
+```
+
+**Crear una Factory**
+
+**Comando Artisan:**
+
+```bash
+php artisan make:factory UserFactory --model=User
+```
+
+El modelo debe utilizar el trait `HasFactory` para poder llamar a `User::factory()`:
+
+```php
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class User extends Authenticatable
+{
+    use HasFactory;
+}
+```
+
+**Generar registros con una Factory**
+
+La Factory actual está registrada en `DatabaseSeeder.php` y crea 10 usuarios:
+
+```php
+use App\Models\User;
+
+public function run(): void
+{
+    User::factory(10)->create();
+}
+```
+
+También se pueden crear cantidades diferentes o personalizar los atributos:
+
+```php
+User::factory()->count(20)->create();
+
+User::factory()->create([
+    'name' => 'Test User',
+    'email' => 'test@example.com',
+]);
+```
+
+**Estados de una Factory**
+
+Los estados permiten generar una variante específica de un registro. Por ejemplo, `UserFactory` incluye el estado `unverified()` para crear usuarios sin verificar:
+
+```php
+User::factory()->unverified()->count(5)->create();
+```
+
+**Ejecutar la Factory**
+
+Como la Factory está registrada en `DatabaseSeeder`, se ejecuta con:
+
+```bash
+php artisan db:seed
+```
+
+Para borrar las tablas, ejecutar nuevamente las migraciones y poblar la base de datos con las factories y seeders:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+También es posible ejecutarla directamente con Tinker:
+
+```bash
+php artisan tinker
+```
+
+```php
+App\Models\User::factory()->count(10)->create();
+```
+
+**Nota:** `migrate:fresh` elimina todas las tablas antes de volver a crearlas. Utilízalo únicamente en entornos de desarrollo o testing.

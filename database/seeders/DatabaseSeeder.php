@@ -15,7 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Usando Factory crearemos 10 usuarios usando UsserFactory.php
+        User::factory(10)->create();
+        // EJECUTAMOS NUEVAMENTE EL sEEDERS Y EL FACTORY
+        // php artisan db:seed
 
         // User::factory()->create([
         //     'name' => 'Test User',
