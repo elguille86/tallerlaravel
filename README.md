@@ -878,3 +878,262 @@ App\Models\User::factory()->count(10)->create();
 ```
 
 **Nota:** `migrate:fresh` elimina todas las tablas antes de volver a crearlas. Utilízalo únicamente en entornos de desarrollo o testing.
+
+## Commit: 14 - Crear CRUD en Laravel
+
+En este commit se implementa un **CRUD** (Create, Read, Update, Delete) para administrar los registros de la tabla `posts` usando Laravel, Eloquent, controladores y vistas Blade.
+
+**¿Qué es un CRUD?**
+
+CRUD representa las cuatro operaciones principales para trabajar con información:
+
+* **Create:** crear un nuevo registro.
+* **Read:** consultar y mostrar registros.
+* **Update:** editar un registro existente.
+* **Delete:** eliminar un registro.
+
+En este proyecto, el CRUD se aplica al modelo `Post` y a la tabla `posts`.
+
+**1. Estructura utilizada**
+
+* **Modelo:** `app/Models/Post.php`
+* **Controlador:** `app/Http/Controllers/PostController.php`
+* **Rutas:** `routes/web.php`
+* **Vistas:** `resources/views/posts/`
+* **Migración:** `database/migrations/2026_08_10_092412_create_posts_table.php`
+
+La tabla `posts` contiene los siguientes campos:
+
+```text
+id
+ title
+ content
+ categoria
+ created_at
+ updated_at
+```
+
+**2. Crear el controlador**
+
+El controlador se crea mediante Artisan:
+
+```bash
+php artisan make:controller PostController
+```
+
+El controlador concentra la lógica de las operaciones del CRUD y comunica las solicitudes con el modelo y las vistas.
+
+**3. Rutas del CRUD**
+
+Las rutas se registran en `routes/web.php`:
+
+```php
+Route::get('/posts', [PostController::class, 'index']);
+Route::post('/posts', [PostController::class, 'store']);
+Route::get('/posts/create', [PostController::class, 'create']);
+Route::get('/posts/{post}', [PostController::class, 'show']);
+Route::get('/posts/{post}/edit', [PostController::class, 'edit']);
+Route::put('/posts/{post}', [PostController::class, 'update']);
+Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+```
+
+**Métodos HTTP utilizados**
+
+| Operación | Método HTTP | URL | Método del controlador |
+|-----------|-------------|-----|------------------------|
+| Listar posts | `GET` | `/posts` | `index` |
+| Mostrar formulario de creación | `GET` | `/posts/create` | `create` |
+| Guardar un post | `POST` | `/posts` | `store` |
+| Mostrar un post | `GET` | `/posts/{post}` | `show` |
+| Mostrar formulario de edición | `GET` | `/posts/{post}/edit` | `edit` |
+| Actualizar un post | `PUT` | `/posts/{post}` | `update` |
+| Eliminar un post | `DELETE` | `/posts/{post}` | `destroy` |
+
+Para comprobar las rutas registradas se puede ejecutar:
+
+```bash
+php artisan route:list --path=posts
+```
+
+**4. Create: crear un post**
+
+El método `create` muestra el formulario de creación:
+
+```php
+public function create(){
+    return view('posts.create');
+}
+```
+
+El formulario se encuentra en `resources/views/posts/create.blade.php` y envía los campos `title`, `categoria` y `content` mediante el método `POST`:
+
+```html
+<form action="{{ url('/posts') }}" method="post">
+    @csrf
+    <input type="text" name="title">
+    <input type="text" name="categoria">
+    <textarea name="content"></textarea>
+    <button type="submit">Crear Post</button>
+</form>
+```
+
+El método `store` recibe la información y crea el registro con Eloquent:
+
+```php
+public function store(Request $request){
+    $post = new Post();
+    $post->title = $request->input('title');
+    $post->content = $request->input('content');
+    $post->categoria = $request->input('categoria');
+    $post->save();
+    return redirect('/posts');
+}
+```
+
+Se utiliza `input()` para obtener los valores enviados por el formulario de forma explícita.
+
+**5. Read: consultar posts**
+
+El método `index` obtiene todos los posts ordenados del más reciente al más antiguo:
+
+```php
+public function index(){
+    $posts = Post::orderBy('id', 'desc')->get();
+    return view('posts.index', ['posts' => $posts]);
+}
+```
+
+La vista `resources/views/posts/index.blade.php` recorre la colección con `@foreach` y muestra un enlace hacia el detalle de cada post:
+
+```blade
+@foreach ($posts as $post)
+    <a href="posts/{{ $post->id }}">
+        {{ $post->title }}
+    </a>
+@endforeach
+```
+
+Para consultar un único post se utiliza el método `show`:
+
+```php
+public function show(string $post){
+    $post = Post::find($post);
+    return view('posts.show', compact('post'));
+}
+```
+
+**6. Update: editar un post**
+
+El método `edit` busca el registro y carga el formulario de edición:
+
+```php
+public function edit(string $post){
+    $post = Post::find($post);
+    return view('posts.edit', compact('post'));
+}
+```
+
+El formulario de `resources/views/posts/edit.blade.php` utiliza `POST` como método HTML y `@method('PUT')` para que Laravel interprete la solicitud como `PUT`:
+
+```blade
+<form action="{{ url('/posts/' . $post->id) }}" method="post">
+    @csrf
+    @method('PUT')
+    <!-- campos del post -->
+    <button type="submit">Editar Post</button>
+</form>
+```
+
+El método `update` guarda los cambios:
+
+```php
+public function update(Request $request, string $post){
+    $post = Post::find($post);
+
+    $post->title = $request->input('title');
+    $post->content = $request->input('content');
+    $post->categoria = $request->input('categoria');
+    $post->save();
+    return redirect("/posts/{$post->id}");
+}
+```
+
+La ruta debe utilizar `Route::put`, porque el formulario envía una solicitud `PUT`:
+
+```php
+Route::put('/posts/{post}', [PostController::class, 'update']);
+```
+
+**7. Delete: eliminar un post**
+
+El detalle del post incluye un formulario para eliminarlo:
+
+```blade
+<form action="{{ url('/posts/' . $post->id) }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <button type="submit">Eliminar Post</button>
+</form>
+```
+
+El método `destroy` busca el registro, lo elimina y vuelve al listado:
+
+```php
+public function destroy(string $post){
+    $post = Post::find($post);
+    $post->delete();
+    return redirect('/posts');
+}
+```
+
+La ruta correspondiente es:
+
+```php
+Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+```
+
+**8. Protección CSRF y métodos HTML**
+
+Los formularios que modifican información deben incluir:
+
+```blade
+@csrf
+```
+
+Laravel utiliza este token para verificar que la solicitud proviene de la aplicación.
+
+Como HTML solo admite directamente los métodos `GET` y `POST`, Laravel permite simular `PUT` y `DELETE` mediante:
+
+```blade
+@method('PUT')
+@method('DELETE')
+```
+
+Si el formulario usa `@method('PUT')`, la ruta debe declararse con `Route::put()`. De lo contrario, Laravel mostrará el error `MethodNotAllowedHttpException`.
+
+**9. Pruebas del CRUD**
+
+Con el servidor local funcionando, las URLs principales son:
+
+```text
+http://localhost/tallerlaravel/public/posts
+http://localhost/tallerlaravel/public/posts/create
+http://localhost/tallerlaravel/public/posts/{id}
+http://localhost/tallerlaravel/public/posts/{id}/edit
+```
+
+Flujo de prueba:
+
+1. Entrar a `/posts` para consultar los registros.
+2. Seleccionar **Nuevo Post** y guardar un registro.
+3. Abrir el título de un post para consultar su detalle.
+4. Seleccionar **Editar Post** y guardar los cambios.
+5. Seleccionar **Eliminar Post** y verificar que desaparezca del listado.
+
+**Objetivos de la clase**
+
+1. Comprender las operaciones básicas de un CRUD.
+2. Conectar rutas, controlador, modelo y vistas Blade.
+3. Utilizar Eloquent para crear, consultar, actualizar y eliminar registros.
+4. Aplicar los métodos HTTP `GET`, `POST`, `PUT` y `DELETE`.
+5. Proteger los formularios con `@csrf` y usar métodos HTTP simulados con `@method`.

@@ -73,6 +73,8 @@ Route::get('/posts', function () {
 // Se ha cambiar la ruta de la pagina principal a un controlador, para ello se ha creado el controlador PostController.php
 Route::get('/posts', [PostController::class, 'index']);
 
+Route::post('/posts', [PostController::class, 'store']);
+
 // La URL larga segeria : http://localhost/tallerlaravel/public/posts/create
 Route::get('/posts/create', [PostController::class, 'create']);
 //Route::get("posts/create", function () {    
@@ -83,6 +85,14 @@ Route::get('/posts/{post}', [PostController::class, 'show']);
 // Route::get("posts/{post}", function ($post) {    
 //     return "Aqui se mostrara el post {$post}";
 // });
+// para ver un registro y editar
+Route::get('/posts/{post}/edit', [PostController::class, 'edit']);
+
+// para Grabar los Datos a editar
+Route::put('/posts/{post}', [PostController::class, 'update']);
+
+Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+
 /*
 // La URL larga segeria : http://localhost/tallerlaravel/public/posts/50/tecnologia con parametros
 Route::get("posts/{post}/{category}", function ($post, $category) {    
