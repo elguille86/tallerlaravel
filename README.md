@@ -1382,3 +1382,189 @@ $posts = Post::paginate(10);
 4. Configurar los estilos de paginación con Tailwind CSS.
 5. Conservar filtros y parámetros de consulta entre páginas.
 6. Diferenciar entre `paginate()`, `simplePaginate()` y `cursorPaginate()`.
+
+## Commit: 16 - Rutas con nombre en Laravel
+
+En este commit se agregan **rutas con nombre** para identificar cada endpoint del CRUD de posts. Esta característica permite generar URLs y redirecciones utilizando un nombre descriptivo, evitando depender directamente de las direcciones escritas en el código.
+
+**¿Qué es una ruta con nombre?**
+
+Una ruta con nombre utiliza el método `name()` para asignar un identificador único a una ruta:
+
+El nombre `posts.index` puede utilizarse desde controladores y vistas para generar la URL correspondiente.
+
+**1. Rutas con nombre del CRUD**
+
+Las rutas del CRUD de posts se definen en `routes/web.php` de la siguiente manera:
+
+```php
+Route::get('/posts', [PostController::class, 'index'])
+    ->name('posts.index');
+
+Route::post('/posts', [PostController::class, 'store'])
+    ->name('posts.store');
+
+Route::get('/posts/create', [PostController::class, 'create'])
+    ->name('posts.create');
+
+Route::get('/posts/{post}', [PostController::class, 'show'])
+    ->name('posts.show');
+
+Route::get('/posts/{post}/edit', [PostController::class, 'edit'])
+    ->name('posts.edit');
+
+Route::put('/posts/{post}', [PostController::class, 'update'])
+    ->name('posts.update');
+
+Route::delete('/posts/{post}', [PostController::class, 'destroy'])
+    ->name('posts.destroy');
+```
+
+Cada nombre debe ser único dentro de la aplicación. La convención utilizada en este proyecto es `recurso.acción`, por ejemplo `posts.index` y `posts.update`.
+
+**2. Generar URLs en las vistas**
+
+En lugar de escribir una URL directamente con `url()`, se puede utilizar `route()`:
+
+```blade
+<a href="{{ route('posts.index') }}">Ver todos los posts</a>
+<a href="{{ route('posts.create') }}">Nuevo Post</a>
+```
+
+Para una ruta que recibe el parámetro `{post}`, se envía el ID como segundo argumento:
+
+```blade
+<a href="{{ route('posts.show', $post->id) }}">
+    {{ $post->title }}
+</a>
+
+<a href="{{ route('posts.edit', $post->id) }}">
+    Editar Post
+</a>
+```
+
+También se puede enviar el parámetro indicando su nombre:
+
+```blade
+{{ route('posts.show', ['post' => $post->id]) }}
+```
+
+**3. Utilizar rutas con nombre en formularios**
+
+Los formularios también pueden generar su destino mediante `route()`:
+
+```blade
+<form action="{{ route('posts.store') }}" method="POST">
+    @csrf
+    <!-- campos del post -->
+</form>
+```
+
+Para actualizar un registro se incluye el parámetro y se simula el método `PUT`:
+
+```blade
+<form action="{{ route('posts.update', $post->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+    <!-- campos del post -->
+</form>
+```
+
+Para eliminar un registro se utiliza la ruta `posts.destroy`:
+
+```blade
+<form action="{{ route('posts.destroy', $post->id) }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <button type="submit">Eliminar Post</button>
+</form>
+```
+
+**4. Redireccionar utilizando el nombre de la ruta**
+
+En el controlador, `redirect()->route()` permite redireccionar sin escribir manualmente la URL:
+
+```php
+return redirect()->route('posts.index');
+```
+
+Después de actualizar un post, se puede enviar el ID como parámetro:
+
+```php
+return redirect()->route('posts.show', $post->id);
+```
+
+Esto mantiene el controlador independiente de la estructura exacta de las URLs.
+
+**5. Verificar las rutas registradas**
+
+Para revisar los nombres, métodos y URLs de las rutas se utiliza:
+
+```bash
+php artisan route:list --path=posts
+```
+
+La columna `Name` debe mostrar nombres como:
+
+```text
+posts.index
+posts.store
+posts.create
+posts.show
+posts.edit
+posts.update
+posts.destroy
+```
+
+También se puede obtener una URL desde Tinker:
+
+```bash
+php artisan tinker
+```
+
+```php
+route('posts.show', 1);
+```
+
+**6. Ventajas de utilizar rutas con nombre**
+
+* Evitan repetir URLs en controladores y vistas.
+* Facilitan cambiar la dirección de una ruta en un solo lugar.
+* Mejoran la legibilidad del código.
+* Reducen errores al construir URLs con parámetros.
+* Permiten utilizar nombres descriptivos para cada operación.
+
+**7. Errores frecuentes**
+
+### La ruta no tiene nombre
+
+Si se utiliza `route('posts.index')`, la ruta debe tener `->name('posts.index')`:
+
+```php
+Route::get('/posts', [PostController::class, 'index'])
+    ->name('posts.index');
+```
+
+### El nombre no coincide
+
+El nombre utilizado en `route()` debe coincidir exactamente con el declarado en `name()`. Por ejemplo, `posts.show` y `post.show` son nombres diferentes.
+
+### Falta un parámetro
+
+Las rutas con `{post}` necesitan recibir el ID del registro:
+
+```blade
+{{ route('posts.show', $post->id) }}
+```
+
+### Método HTTP incorrecto
+
+El formulario de actualización debe utilizar `@method('PUT')` y la ruta debe declararse con `Route::put()`. Para eliminar, se debe utilizar `@method('DELETE')` y `Route::delete()`.
+
+**Objetivos de la clase**
+
+1. Comprender qué son las rutas con nombre en Laravel.
+2. Asignar nombres a las rutas del CRUD.
+3. Generar URLs con `route()` desde las vistas.
+4. Utilizar `redirect()->route()` desde los controladores.
+5. Verificar los nombres de las rutas con Artisan.

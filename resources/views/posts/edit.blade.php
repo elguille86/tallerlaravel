@@ -1,7 +1,7 @@
 <x-app-layout>
-    <a href="{{ url('/posts') }}" class="text-blue-600 hover:text-blue-800 underline font-medium transition duration-150"> Volver a Posts</a>
+    <a href="{{ route('posts.index') }}" class="text-blue-600 hover:text-blue-800 underline font-medium transition duration-150"> Volver a Posts</a>
     <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 my-6">Formulario para Editar un Post</h2>
-    <form action="{{ url('/posts/' . $post->id ) }}" method="post">
+    <form action="{{ route('posts.update' , $post->id ) }}" method="post">
         @csrf 
         @method('PUT')
         <label for="">

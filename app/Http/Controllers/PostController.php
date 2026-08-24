@@ -34,7 +34,8 @@ class PostController extends Controller
         $post->categoria = $request->categoria;
         $post->save();
  
-       return redirect('/posts');
+       //return redirect('/posts');
+       return redirect()->route('posts.index');
     }  
     
     // Metodo para mostar el Registros a Editar
@@ -54,15 +55,16 @@ class PostController extends Controller
         $post->content = $request->input('content');        
         $post->categoria = $request->categoria;
         $post->save();
-        return redirect("/posts/{$post->id}");
+        //return redirect("/posts/{$post->id}");
+        return redirect()->route('posts.show', $post->id);
     }    
     public function destroy (string $post){
         
         $miID = $post;
         $post = Post::find($miID);
         $post->delete();
-        return redirect('/posts'); 
-
+        //return redirect('/posts'); 
+        return redirect()->route('posts.index');
     }
 
     // Metodo para mostrar el detalle de un registros
