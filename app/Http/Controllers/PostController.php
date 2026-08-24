@@ -10,7 +10,8 @@ class PostController extends Controller
     public function index(){
         // return "Aqui se mostrar todos los posts";
         //$posts = Post::all();
-        $posts = Post::orderBy("id","desc")->get();
+        //$posts = Post::orderBy("id","desc")->get();
+        $posts = Post::orderBy("id","desc")->paginate(10);
         
         return view("posts.index",["posts"=>$posts]);
         //eturn view("posts.index",compact("posts")

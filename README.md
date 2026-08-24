@@ -1137,3 +1137,248 @@ Flujo de prueba:
 3. Utilizar Eloquent para crear, consultar, actualizar y eliminar registros.
 4. Aplicar los métodos HTTP `GET`, `POST`, `PUT` y `DELETE`.
 5. Proteger los formularios con `@csrf` y usar métodos HTTP simulados con `@method`.
+
+## Commit: 15 - Paginación en Laravel
+
+En este commit se implementa la **paginación de registros** en Laravel utilizando Eloquent y Blade. La paginación permite dividir grandes cantidades de resultados en varias páginas, facilitando la navegación y reduciendo la cantidad de información cargada en cada solicitud.
+
+**¿Qué es la paginación?**
+
+La paginación divide una colección de registros en grupos de un tamaño determinado. En lugar de mostrar todos los posts en una sola página, Laravel muestra una cantidad limitada y genera enlaces para consultar las páginas restantes.
+
+**Ventajas de utilizar paginación**
+
+* Mejora el tiempo de carga de la página.
+* Reduce la cantidad de registros consultados y mostrados.
+* Facilita la navegación del usuario.
+* Evita interfaces con listas demasiado extensas.
+* Permite trabajar con grandes volúmenes de información.
+
+**1. Paginación con Eloquent**
+
+Para paginar una consulta de Eloquent se utiliza el método `paginate()`:
+
+```php
+$posts = Post::paginate(10);
+```
+
+El número `10` indica que se mostrarán diez registros por página.
+También se puede combinar con filtros y ordenamiento:
+
+```php
+$posts = Post::orderBy('id', 'desc')->paginate(10);
+```
+
+En este proyecto, los posts se ordenan por `id` de forma descendente para mostrar primero los registros más recientes.
+
+**2. Modificar el método `index`**
+
+El método `index` del controlador se encarga de consultar los posts y enviarlos a la vista:
+
+```php
+public function index(){
+    $posts = Post::orderBy('id', 'desc')->paginate(10);
+    return view('posts.index', ['posts' => $posts]);
+}
+```
+
+La diferencia principal con `get()` es que `paginate()` devuelve una colección paginada con información adicional, como:
+
+* Página actual.
+* Total de registros.
+* Número de páginas.
+* Cantidad de registros por página.
+* Enlaces de navegación.
+
+**Comparación entre `get()` y `paginate()`**
+
+```php
+// Obtiene todos los registros
+$posts = Post::orderBy('id', 'desc')->get();
+
+// Obtiene diez registros por página
+$posts = Post::orderBy('id', 'desc')->paginate(10);
+```
+
+`get()` es apropiado para colecciones pequeñas. `paginate()` es recomendable cuando la tabla puede crecer y contener muchos registros.
+
+**3. Mostrar los posts en Blade**
+
+La vista `resources/views/posts/index.blade.php` recorre los registros paginados utilizando `@foreach`:
+
+```blade
+@foreach ($posts as $post)
+    <li>
+        <a href="posts/{{ $post->id }}">
+            {{ $post->title }}
+        </a>
+    </li>
+@endforeach
+```
+
+La colección paginada puede recorrerse igual que una colección normal de Eloquent.
+
+**4. Mostrar los enlaces de navegación**
+
+Después de recorrer los registros, se utiliza el método `links()` para mostrar los enlaces de paginación:
+
+```blade
+{{ $posts->links() }}
+```
+
+En este proyecto, la vista utiliza:
+
+```blade
+{{ $posts->links(); }}
+```
+
+Laravel genera automáticamente los enlaces para ir a la página anterior, siguiente y a las páginas disponibles.
+
+**5. Configuración de estilos**
+
+Laravel utiliza vistas de paginación compatibles con Tailwind CSS. Para indicar que la aplicación debe utilizar Tailwind, se puede configurar el proveedor de paginación en `AppServiceProvider`:
+
+```php
+namespace App\Providers;
+
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    public function boot(): void
+    {
+        Paginator::useTailwind();
+    }
+}
+```
+
+Si el proyecto utiliza Bootstrap, se puede indicar el estilo correspondiente:
+
+```php
+Paginator::useBootstrapFive();
+```
+
+La configuración se realiza en el método `boot()` de `app/Providers/AppServiceProvider.php`.
+
+**6. Consultar una página específica**
+
+Laravel utiliza el parámetro `page` en la URL para identificar la página solicitada:
+
+```text
+/posts?page=1
+/posts?page=2
+/posts?page=3
+```
+
+No es necesario leer manualmente este parámetro. Laravel lo procesa automáticamente cuando se utiliza `paginate()`.
+
+**7. Mantener parámetros en los enlaces**
+
+Cuando la consulta utiliza filtros o búsquedas, se pueden conservar los parámetros en los enlaces de paginación con `withQueryString()`:
+
+```php
+$posts = Post::where('categoria', 'Laravel')
+    ->orderBy('id', 'desc')
+    ->paginate(10)
+    ->withQueryString();
+```
+
+Así, los enlaces mantienen los parámetros actuales de la URL al cambiar de página.
+
+También se puede utilizar `appends()` para agregar parámetros específicos:
+
+```php
+$posts = Post::orderBy('id', 'desc')
+    ->paginate(10)
+    ->appends(['categoria' => 'Laravel']);
+```
+
+**8. Tipos de paginación**
+
+Laravel incluye varias formas de paginar resultados:
+
+| Método | Descripción |
+|--------|-------------|
+| `paginate(10)` | Genera enlaces con número de páginas y total de registros. |
+| `simplePaginate(10)` | Solo muestra enlaces anterior y siguiente. |
+| `cursorPaginate(10)` | Utiliza paginación por cursor para grandes volúmenes de datos. |
+
+### `simplePaginate`
+
+```php
+$posts = Post::orderBy('id', 'desc')->simplePaginate(10);
+```
+
+Este método puede ser útil cuando no se necesita conocer el número total de registros.
+
+### `cursorPaginate`
+
+```php
+$posts = Post::orderBy('id', 'desc')->cursorPaginate(10);
+```
+
+La paginación por cursor puede ofrecer un mejor rendimiento en tablas con muchos registros, especialmente cuando se navega entre páginas consecutivas.
+
+**9. Comandos y pruebas**
+
+Para revisar las rutas de posts:
+
+```bash
+php artisan route:list --path=posts
+```
+
+Para limpiar las vistas compiladas después de modificar una vista Blade:
+
+```bash
+php artisan view:clear
+```
+
+Para probar la paginación:
+
+1. Crear o cargar varios registros en la tabla `posts`.
+2. Abrir la URL `/posts`.
+3. Verificar que se muestran diez registros por página.
+4. Seleccionar el enlace de la página siguiente.
+5. Confirmar que la URL incluye el parámetro `page`.
+
+URL local del proyecto:
+
+```text
+http://localhost/tallerlaravel/public/posts
+```
+
+**10. Errores frecuentes**
+
+### No aparecen los enlaces
+
+Verificar que la vista incluya:
+
+```blade
+{{ $posts->links() }}
+```
+
+### Se utiliza `get()` en lugar de `paginate()`
+
+El método `get()` devuelve una colección normal y no incluye el método `links()`. Para mostrar paginación se debe utilizar `paginate()` o `simplePaginate()`.
+
+### La vista de paginación no tiene estilos
+
+Comprobar que el proyecto tenga Tailwind CSS configurado y que `Paginator::useTailwind()` se encuentre en `AppServiceProvider` cuando sea necesario.
+
+### Se muestran demasiados registros
+
+Reducir el número recibido por `paginate()`:
+
+```php
+$posts = Post::paginate(10);
+```
+
+**Objetivos de la clase**
+
+1. Comprender qué es la paginación y por qué es importante.
+2. Utilizar `paginate()` en consultas de Eloquent.
+3. Mostrar enlaces de navegación con `links()` en Blade.
+4. Configurar los estilos de paginación con Tailwind CSS.
+5. Conservar filtros y parámetros de consulta entre páginas.
+6. Diferenciar entre `paginate()`, `simplePaginate()` y `cursorPaginate()`.
