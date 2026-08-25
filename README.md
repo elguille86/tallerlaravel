@@ -1568,3 +1568,218 @@ El formulario de actualización debe utilizar `@method('PUT')` y la ruta debe de
 3. Generar URLs con `route()` desde las vistas.
 4. Utilizar `redirect()->route()` desde los controladores.
 5. Verificar los nombres de las rutas con Artisan.
+
+## Commit: 17 - Route Resource y nombres personalizados en Laravel
+
+En este commit se utiliza `Route::resource` para crear automáticamente las rutas de un CRUD. También se explica cómo cambiar el nombre de las URL sin cambiar los nombres de las rutas que ya se utilizan en las vistas y en los controladores.
+
+**¿Qué es `Route::resource`?**
+
+`Route::resource` registra en una sola línea las siete rutas convencionales de un CRUD:
+
+```php
+use App\Http\Controllers\PostController;
+
+Route::resource('posts', PostController::class);
+```
+
+Laravel relaciona automáticamente cada ruta con los métodos `index`, `create`, `store`, `show`, `edit`, `update` y `destroy` del controlador.
+
+**1. Rutas generadas por `Route::resource`**
+
+| Método HTTP | URL | Nombre de la ruta | Método del controlador |
+|-------------|-----|-------------------|------------------------|
+| `GET` | `/posts` | `posts.index` | `index` |
+| `GET` | `/posts/create` | `posts.create` | `create` |
+| `POST` | `/posts` | `posts.store` | `store` |
+| `GET` | `/posts/{post}` | `posts.show` | `show` |
+| `GET` | `/posts/{post}/edit` | `posts.edit` | `edit` |
+| `PUT/PATCH` | `/posts/{post}` | `posts.update` | `update` |
+| `DELETE` | `/posts/{post}` | `posts.destroy` | `destroy` |
+
+**2. Crear un controlador resource**
+
+Para crear un controlador con los métodos básicos del CRUD se utiliza Artisan:
+
+```bash
+php artisan make:controller PostController --resource
+```
+
+El controlador creado contiene los siguientes métodos:
+
+```php
+public function index() {}
+public function create() {}
+public function store(Request $request) {}
+public function show(string $id) {}
+public function edit(string $id) {}
+public function update(Request $request, string $id) {}
+public function destroy(string $id) {}
+```
+
+En este proyecto, los métodos se encuentran en `app/Http/Controllers/PostController.php`.
+
+**3. Cambiar las URL y mantener los nombres de las rutas**
+
+Para cambiar el prefijo de las URL de `/posts` a `/articulos`, se utiliza `articulos` como primer argumento de `Route::resource`. El método `names()` permite conservar los nombres actuales `posts.*`:
+
+```php
+Route::resource('articulos', PostController::class)
+    ->names([
+        'index' => 'posts.index',
+        'create' => 'posts.create',
+        'store' => 'posts.store',
+        'show' => 'posts.show',
+        'edit' => 'posts.edit',
+        'update' => 'posts.update',
+        'destroy' => 'posts.destroy',
+    ]);
+```
+
+Con esta configuración:
+
+* La URL pública cambia a `/articulos`.
+* El controlador continúa siendo `PostController`.
+* Los nombres siguen siendo `posts.index`, `posts.create`, `posts.store`, `posts.show`, `posts.edit`, `posts.update` y `posts.destroy`.
+* Las vistas pueden continuar utilizando `route('posts.index')` y `route('posts.show', $post->id)`.
+
+Aunque el nombre de la ruta sea `posts.index`, Laravel generará la URL `/articulos`.
+
+**4. Usar las rutas con nombre en las vistas**
+
+Las vistas pueden generar las URL mediante `route()`:
+
+```blade
+<a href="{{ route('posts.index') }}">Ver posts</a>
+<a href="{{ route('posts.create') }}">Nuevo Post</a>
+<a href="{{ route('posts.show', $post->id) }}">Ver detalle</a>
+<a href="{{ route('posts.edit', $post->id) }}">Editar</a>
+```
+
+Los formularios de actualización y eliminación conservan los mismos nombres de rutas:
+
+```blade
+<form action="{{ route('posts.update', $post->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+    <!-- campos del post -->
+</form>
+
+<form action="{{ route('posts.destroy', $post->id) }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <button type="submit">Eliminar Post</button>
+</form>
+```
+
+**5. Cambiar también los nombres de las rutas**
+
+Si se desea que tanto las URL como los nombres utilicen `articulos`, se puede registrar el recurso sin `names()`:
+
+```php
+Route::resource('articulos', PostController::class);
+```
+
+En ese caso se generan nombres como `articulos.index`, `articulos.create`, `articulos.show` y `articulos.update`.
+
+Para personalizar solo algunos nombres se puede utilizar `names()`:
+
+```php
+Route::resource('articulos', PostController::class)
+    ->names([
+        'index' => 'posts.index',
+        'show' => 'posts.show',
+    ]);
+```
+
+Para conservar todos los nombres `posts.*`, se debe utilizar el arreglo completo mostrado en la sección anterior.
+
+**6. Mantener el parámetro `{post}`**
+
+Cuando el recurso se llama `articulos`, Laravel puede generar el parámetro `{articulo}`. Para conservar el parámetro `{post}`, se utiliza `parameters()`:
+
+```php
+Route::resource('articulos', PostController::class)
+    ->parameters(['articulos' => 'post'])
+    ->names([
+        'show' => 'posts.show',
+        'edit' => 'posts.edit',
+        'update' => 'posts.update',
+        'destroy' => 'posts.destroy',
+    ]);
+```
+
+La URL de detalle será `/articulos/{post}` y el controlador podrá recibir el parámetro `$post`.
+
+**7. Limitar las acciones del resource**
+
+Si no se necesitan todas las acciones, se pueden seleccionar con `only()`:
+
+```php
+Route::resource('articulos', PostController::class)
+    ->only(['index', 'show'])
+    ->names([
+        'index' => 'posts.index',
+        'show' => 'posts.show',
+    ]);
+```
+
+También se pueden excluir acciones con `except()`:
+
+```php
+Route::resource('articulos', PostController::class)
+    ->except(['destroy']);
+```
+
+**8. Verificar las rutas generadas**
+
+Para revisar los métodos, URL y nombres de las rutas:
+
+```bash
+php artisan route:list --path=articulos
+```
+
+Después de cambiar las rutas, se puede limpiar la caché con:
+
+```bash
+php artisan route:clear
+```
+
+En producción, después de comprobar los cambios, se puede volver a generar:
+
+```bash
+php artisan route:cache
+```
+
+La columna `Name` debe mostrar los nombres `posts.index`, `posts.create`, `posts.store`, `posts.show`, `posts.edit`, `posts.update` y `posts.destroy` cuando se utiliza el arreglo completo de `names()`.
+
+**9. Errores frecuentes**
+
+### Se mantienen las rutas individuales y `Route::resource`
+
+No se deben registrar ambos bloques para el mismo recurso, porque se duplicarían las rutas.
+
+### El nombre utilizado no existe
+
+Si se utiliza `route('posts.index')`, debe existir una ruta con el nombre `posts.index`. Se puede comprobar con `php artisan route:list`.
+
+### Falta el parámetro del recurso
+
+Las rutas `show`, `edit`, `update` y `destroy` necesitan recibir el ID del post:
+
+```blade
+{{ route('posts.show', $post->id) }}
+```
+
+### Error `MethodNotAllowedHttpException`
+
+El método del formulario debe coincidir con el método de la ruta. Para actualizar se utiliza `@method('PUT')` y para eliminar `@method('DELETE')`.
+
+**Objetivos de la clase**
+
+1. Comprender el funcionamiento de `Route::resource`.
+2. Generar las rutas de un CRUD automáticamente.
+3. Cambiar las URL utilizando un recurso diferente.
+4. Conservar nombres de rutas mediante `names()`.
+5. Mantener parámetros personalizados con `parameters()`.
+6. Verificar las rutas generadas con Artisan.

@@ -117,6 +117,46 @@ Route::get("posts2/{post}/{category?}", function ($post, $category=null) {
     return "Aqui se mostrara el post {$post} en la categoria {$category}";
 });
 */
+/*
+// Usando Route Resource lo que crear las 7 rutas usando las conversion usando
+Route::resource('posts',PostController::class)
+
+D:\xampp\htdocs\tallerlaravel> php artisan route:list 
+POST        _ignition/update-config ignition.updateConfig
+GET|HEAD    posts .............. posts.index › PostController@index
+POST        posts .............. posts.store › PostController@store
+GET|HEAD    posts/create ....... posts.create › PostController@create
+GET|HEAD    posts/{post} ....... posts.show › PostController@show
+PUT|PATCH   posts/{post} ....... posts.update › PostController@update
+DELETE      posts/{post} ....... posts.destroy › PostController@destroy
+GET|HEAD    posts/{post} ....... posts.edit › PostController@edit
+
+//para omitir un metodo que se use se puede usar
+Route::resource('posts',PostController::class)->except(['destroy','show']);
+
+D:\xampp\htdocs\tallerlaravel> php artisan route:list 
+POST        _ignition/update-config ignition.updateConfig
+GET|HEAD    posts .............. posts.index › PostController@index
+POST        posts .............. posts.store › PostController@store
+GET|HEAD    posts/create ....... posts.create › PostController@create
+PUT|PATCH   posts/{post} ....... posts.update › PostController@update
+GET|HEAD    posts/{post} ....... posts.edit › PostController@edit
+
+// para ver las rutas con el comando : D:\xampp\htdocs\tallerlaravel> php artisan route:list --path=posts
+
+si queremos cambiar el nombre de las URL y mantener las rutas se puede hacer
+Route::resource('articulos',PostController::class)->name('posts')->parameters(['articulos','posts']));
+
+queda asi :
+POST        _ignition/update-config ignition.updateConfig
+GET|HEAD    articulos .............. posts.index › PostController@index
+POST        articulos .............. posts.store › PostController@store
+GET|HEAD    articulos/create ....... posts.create › PostController@create
+GET|HEAD    articulos/{post} ....... posts.show › PostController@show
+PUT|PATCH   articulos/{post} ....... posts.update › PostController@update
+DELETE      articulos/{post} ....... posts.destroy › PostController@destroy
+
+*/
 
 Route::get('prueba',  function () {
     // Crear un registro en la tabla posts
