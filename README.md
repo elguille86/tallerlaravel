@@ -1783,3 +1783,206 @@ El método del formulario debe coincidir con el método de la ruta. Para actuali
 4. Conservar nombres de rutas mediante `names()`.
 5. Mantener parámetros personalizados con `parameters()`.
 6. Verificar las rutas generadas con Artisan.
+
+---
+## Clase 18 - Route Model Binding
+
+En esta clase se utiliza **Route Model Binding** para que Laravel convierta automaticamente el parametro `{post}` de la URL en una instancia del modelo `Post`.
+
+**1. Binding implicito**
+
+Las rutas del CRUD se generan en `routes/web.php` con `Route::resource`:
+
+```php
+use App\Http\Controllers\PostController;
+
+Route::resource('posts', PostController::class);
+```
+
+Entre las rutas generadas se encuentran:
+
+```text
+GET /posts/{post}          posts.show
+GET /posts/{post}/edit     posts.edit
+PUT /posts/{post}          posts.update
+DELETE /posts/{post}       posts.destroy
+```
+
+El parametro `{post}` coincide con el tipo `Post $post` del controlador. Laravel busca el registro y lo inyecta automaticamente:
+
+```php
+public function show(Post $post)
+{
+    return view('posts.show', compact('post'));
+}
+
+public function edit(Post $post)
+{
+    return view('posts.edit', compact('post'));
+}
+```
+
+Sin Route Model Binding habria que recibir un valor, buscarlo manualmente y comprobar si existe:
+
+```php
+public function show(string $post)
+{
+    $post = Post::findOrFail($post);
+    return view('posts.show', compact('post'));
+}
+```
+
+Con `Post $post`, Laravel realiza esa busqueda automaticamente. Si no encuentra el registro, devuelve un error 404.
+
+**2. Binding por defecto usando el id**
+
+Por defecto, Laravel busca el modelo utilizando la columna `id`. Por ejemplo:
+
+```text
+/posts/103/edit
+```
+
+equivale a buscar:
+
+```sql
+SELECT * FROM posts WHERE id = 103;
+```
+
+Los enlaces pueden enviar el modelo completo o su id:
+
+```blade
+{{ route('posts.edit', $post) }}
+{{ route('posts.edit', ['post' => $post->id]) }}
+```
+
+**3. Cambiar el binding para utilizar slug**
+
+En el modelo `app/Models/Post.php` se agrego este metodo:
+
+```php
+public function getRouteKeyName()
+{
+    return 'slug';
+}
+```
+
+Con esta configuracion, Laravel deja de buscar por `id` y utiliza `slug`:
+
+```text
+/posts/mi-primer-post/edit
+```
+
+La consulta equivalente sera:
+
+```sql
+SELECT * FROM posts WHERE slug = 'mi-primer-post';
+```
+
+El enlace recomendado en `resources/views/posts/index.blade.php` es:
+
+```blade
+@foreach ($posts as $post)
+    <a href="{{ route('posts.show', ['post' => $post->slug]) }}">
+        {{ $post->title }}
+    </a>
+@endforeach
+```
+
+Tambien puede utilizarse el modelo completo porque Laravel conoce el campo definido por `getRouteKeyName()`:
+
+```blade
+{{ route('posts.show', $post) }}
+```
+
+**4. Crear y actualizar el slug**
+
+El campo `slug` debe tener un valor antes de generar enlaces o buscar el modelo. En el controlador actual se recibe desde el formulario:
+
+```php
+$post->slug = $request->input('slug');
+```
+
+En un formulario se debe incluir un campo con ese nombre:
+
+```blade
+<input type="text" name="slug" value="{{ old('slug', $post->slug ?? '') }}">
+```
+
+Otra opcion es generarlo desde el titulo usando `Str::slug()`:
+
+```php
+use Illuminate\Support\Str;
+
+$post->title = $request->input('title');
+$post->slug = Str::slug($post->title);
+```
+
+Como `slug` tiene un indice `unique`, cada post debe tener un slug diferente.
+
+**5. Por que aparece el error 404**
+
+Si `getRouteKeyName()` devuelve `slug`, esta URL ya no busca por el id:
+
+```text
+/posts/103/edit
+```
+
+Laravel interpreta `103` como el valor de `slug`. Si no existe un post cuyo slug sea `103`, el Route Model Binding devuelve 404.
+
+Las soluciones son:
+
+```php
+// Usar nuevamente el id como clave de ruta
+public function getRouteKeyName()
+{
+    return 'id';
+}
+```
+
+o acceder con el slug real:
+
+```text
+/posts/mi-primer-post/edit
+```
+
+Tambien se debe evitar que los posts antiguos tengan `slug` vacio o `NULL`. Es necesario completar esos valores antes de usar slug en las URLs.
+
+**6. Redireccionar despues de actualizar**
+
+Cuando el modelo utiliza `slug`, se recomienda enviar el modelo en la redireccion:
+
+```php
+return redirect()->route('posts.show', $post);
+```
+
+Laravel generara la URL usando el slug configurado en `getRouteKeyName()`.
+
+**7. Comprobar el funcionamiento**
+
+Mostrar las rutas del recurso:
+
+```bash
+php artisan route:list --path=posts
+```
+
+Limpiar las vistas y configuracion almacenadas en cache:
+
+```bash
+php artisan optimize:clear
+```
+
+Flujo de prueba:
+
+1. Crear o actualizar un post con un slug unico.
+2. Entrar a `/posts`.
+3. Abrir el titulo del post y comprobar que la URL contiene el slug.
+4. Abrir la edicion usando `/posts/{slug}/edit`.
+5. Probar la actualizacion y verificar la redireccion al detalle.
+
+**Objetivos de la clase**
+
+1. Entender el funcionamiento del Route Model Binding implicito.
+2. Recibir modelos directamente en los metodos del controlador.
+3. Cambiar la clave de busqueda de `id` a `slug`.
+4. Generar enlaces y redirecciones con parametros de ruta correctos.
+5. Diagnosticar errores 404 causados por un parametro inexistente.

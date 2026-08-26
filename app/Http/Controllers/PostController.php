@@ -31,6 +31,7 @@ class PostController extends Controller
         $post->title = $request->title;
         //$post->content = $request->content;
         $post->content = $request->input('content');        
+        $post->slug = $request->input('slug');                
         $post->categoria = $request->categoria;
         $post->save();
  
@@ -39,41 +40,43 @@ class PostController extends Controller
     }  
     
     // Metodo para mostar el Registros a Editar
-    public function edit(string $post){
-        $miID = $post;
-        $post = Post::find($miID);
+    public function edit(Post $post){
+        
+        //$miID = $post;
+        //$post = Post::find($miID);
         return view("posts.edit",compact("post"));
     }
 
     // Metodo para Grabar los Cambios en el Registro
-    public function update(Request $request, string $post){
-        $miID = $post;
-
-        $post =  Post::find($miID);
+    public function update(Request $request, Post $post){
+        //$miID = $post;
+        //$post =  Post::find($miID);
 
         $post->title = $request->title;
         $post->content = $request->input('content');        
+        $post->slug = $request->input('slug');  
         $post->categoria = $request->categoria;
         $post->save();
         //return redirect("/posts/{$post->id}");
-        return redirect()->route('posts.show', $post->id);
+        //return redirect()->route('posts.show', $post->id);
+        return redirect()->route('posts.show', $post);
     }    
-    public function destroy (string $post){
+    public function destroy (Post $post){
         
-        $miID = $post;
-        $post = Post::find($miID);
+        //$miID = $post;
+        //$post = Post::find($miID);
         $post->delete();
         //return redirect('/posts'); 
         return redirect()->route('posts.index');
     }
 
     // Metodo para mostrar el detalle de un registros
-    public function show(string $post){
+    public function show(Post $post){
         // return "Aqui se mostrara el post {$post}";    
         
         // Crecuperandos el Valor que lleva por post y filtramos en el modelo
-        $miID = $post;
-        $post = Post::find($miID);
+        //$miID = $post;
+        //$post = Post::find($miID);
 
         // compact("post"); es igual a => ["post"=>$post] y se puede usar en la vista de la siguiente manera: $post
         // return view("posts.show",[ "post"=>$post]);

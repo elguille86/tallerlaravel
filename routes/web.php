@@ -72,36 +72,48 @@ Route::get('/posts', function () {
 */
 // Se ha cambiar la ruta de la pagina principal a un controlador, para ello se ha creado el controlador PostController.php
 //Route::get('/posts', [PostController::class, 'index']);
-Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+//Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
 // Crea Registros
 //Route::post('/posts', [PostController::class, 'store']);
-Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+//Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
 
 // HTML Frm Crear
 // La URL larga segeria : http://localhost/tallerlaravel/public/posts/create
 //Route::get('/posts/create', [PostController::class, 'create']);
-Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+//Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
 
 // HTML del Detalle del Registro
 // La URL larga segeria : http://localhost/tallerlaravel/public/posts/50 con parametros
 //Route::get('/posts/{post}', [PostController::class, 'show']);
-Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+//Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
 // Route::get("posts/{post}", function ($post) {    
 //     return "Aqui se mostrara el post {$post}";
 // });
 
 // HTML de Editar
 //Route::get('/posts/{post}/edit', [PostController::class, 'edit']);
-Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+//Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
 
 // Editar Registro
 //Route::put('/posts/{post}', [PostController::class, 'update']);
-Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+//Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
 
 // Eliminar Registro
 //Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+//Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+/*
+Vamos a reemplazar los 7 metodos por una soloa linea
+Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
+Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
+Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
 Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+*/
+Route::Resource('posts',PostController::class);
 
 /*
 // La URL larga segeria : http://localhost/tallerlaravel/public/posts/50/tecnologia con parametros

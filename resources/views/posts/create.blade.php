@@ -8,7 +8,11 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150" required>
         </label>
         <br/><br/>
-
+        <label for="">
+            Slug : <input type="text"  name="slug"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150" required>
+        </label>
+        <br/><br/>
         <label for="">
             Categoria : <input type="text"   name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150" required>
         </label>

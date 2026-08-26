@@ -1,7 +1,7 @@
 <x-app-layout>
     <a href="{{ route('posts.index') }}" class="text-blue-600 hover:text-blue-800 underline font-medium transition duration-150"> Volver a Posts</a>
     <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 my-6">Formulario para Editar un Post</h2>
-    <form action="{{ route('posts.update' , $post->id ) }}" method="post">
+    <form action="{{ route('posts.update' , $post ) }}" method="post">
         @csrf 
         @method('PUT')
         <label for="">
@@ -9,7 +9,11 @@
             class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150" required>
         </label>
         <br/><br/>
-
+        <label for="">
+            Slug : <input type="text"  name="slug" value="{{ $post->slug }}" 
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150" required>
+        </label>
+        <br/><br/>
         <label for="">
             Categoria : <input type="text" value="{{ $post->categoria }}"  name="categoria" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition duration-150" required>
         </label>

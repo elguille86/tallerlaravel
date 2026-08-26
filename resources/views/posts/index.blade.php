@@ -5,7 +5,8 @@
     <ul>
     @foreach ($posts as  $post)
     <li> 
-        <a href="{{ route('posts.show',$post->id) }}" class="text-blue-600 hover:text-blue-800 underline font-medium transition duration-150"  > {{ $post->title }} </a>
+        <!-- Cambiamos el $post->id por $post , usando Route Model Bind,que por defecto es id  -->
+        <a href="{{ route('posts.show',$post) }}" class="text-blue-600 hover:text-blue-800 underline font-medium transition duration-150"  > {{ $post->title }} </a>
     </li>        
     @endforeach
     </ul>

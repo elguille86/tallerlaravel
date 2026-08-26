@@ -16,6 +16,7 @@ class PostSeeder extends Seeder
         $post = new Post();
         $post->title = 'Post 11';
         $post->categoria = 'Categoria 11';
+        $post->slug  =  'Categoria-11';
         $post->content = 'Contenido 11';
         $post->save();
         

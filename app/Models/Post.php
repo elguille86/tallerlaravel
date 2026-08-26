@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 class Post extends Model
 {
@@ -36,7 +37,17 @@ class Post extends Model
             'is_active'=>'boolean',
         ];
     } 
+
+   
+    public function getRouteKeyName()
+    {
+        // http://127.0.0.1/tallerlaravel/public/posts/Algo%20nuevo5555 , asi queda la URL 
+        //return 'title'; //Nombre del Campo que sera parte de parametro
+        return 'slug'; //Nombre del Campo que sera parte de parametro
+         
+    }
    
 
 
 }
+
